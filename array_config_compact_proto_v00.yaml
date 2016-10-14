@@ -8,15 +8,18 @@
 
 # Not sure if this is needed in the yaml or only in the ddbb.
 # We can load these common attributes into any of our objects.
-CommonAttributes: &defaultCommonAttributes
+CommonHistory: &defaultCommonAttributes
   serialNumber: null
   commisioningDate: null
   decomissioningDate: null
 
-Table: &defaulttable
-  # Table should contain as a first column an ID tag.
+CommonProperties: &defaultcommonprop
   ID: null # Number/Code to identify the pixel
   Description: null
+
+Table: &defaulttable
+  <<: *defaultcommonprop
+  # Table should contain as a first column an ID tag.
   Header: []
   Data:  []
   Units: []
@@ -51,10 +54,10 @@ CameraOptics: &defaultcameraoptics
   <<: *defaulttable
 
 Camera: &defaultcamera
-  <<: *defaulttable
+  <<: *defaultcommonprop
   drawers: {}
   pixels:
-    <<: *defaultpixels
+    <<: *defaultpixel
 
 ### FUNDAMENTAL TYPES FOR OPTICS ###
 ####################################
