@@ -15,6 +15,7 @@ CommonHistory: &defaultCommonAttributes
 
 CommonProperties: &defaultcommonprop
   ID: null # Number/Code to identify the pixel
+  Type: null
   Description: null
 
 Table: &defaulttable
@@ -63,13 +64,19 @@ Camera: &defaultcamera
 ####################################
 
 Panel: &defaultpanel
+  # Table of panels
   <<: *defaulttable
 
 Mirror: &defaultmirror
+  # Table of mirrors, can be one
   <<: *defaulttable
 
 TelescopeOptics: &defaultoptics
-  <<: *defaulttable
+  <<: *defaultcommonprop
+  mirrors:
+    primary:
+      <<: *defaultmirror
+    # May add a secondary if needed
 
 ### FUNDAMENTAL TYPES FOR MOUNT ###
 ###################################
@@ -89,7 +96,13 @@ MonitorUnit: &defaultmonitor
 #######################################
 
 Telescope: &defaultteslescope
-  <<: *defaulttable
+  <<: *defaultcommonprop
+  monitorunit:
+    <<: *defaultmonitor
+  mount:
+    <<: *defaultmount
+  optics:
+    <<: *defaultoptics
   # should include monitorunit, mount, optics, camera
 
 
