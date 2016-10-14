@@ -54,7 +54,7 @@ Camera: &defaultcamera
   <<: *defaulttable
   drawers: {}
   pixels:
-    <<: &defaultpixels
+    <<: *defaultpixels
 
 ### FUNDAMENTAL TYPES FOR OPTICS ###
 ####################################
