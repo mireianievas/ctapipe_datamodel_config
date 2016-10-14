@@ -4,7 +4,8 @@ from astropy.table import Table
 from astropy.io import ascii
 from collections import OrderedDict
 from astropy.units import Quantity
-import yaml
+import ruamel.yaml as yaml
+from ruamel.yaml.representer import SafeRepresenter
 import numpy as np
 import sys
 from urllib.request import urlopen
@@ -14,23 +15,136 @@ templatef_local  = "array_config_compact_proto_v00.yaml"
 templatef_remote = "https://raw.githubusercontent.com/mireianievas/ctapipe_datamodel_config/master/array_config_compact_proto_v00.yaml"
 infile = "https://drive.google.com/uc?export=download&id=0B4OIF0_Zm04WbFdfTzBuOTQ2em8"
 
-
 # Read the content and the template
 
 with urlopen(templatef_remote) as fin:
     YamlTemplate = yaml.safe_load(fin)
 
-content = ascii.read(infile)
+raw_geometry_file_content = ascii.read(infile)
+
+##### YAML Handlers
+def quantity_representer(dumper, data):
+    item_key   = float(data.value)
+    item_value = str(data.unit)
+    value = "%s %s" %(item_key,item_value)
+def ordereddict_representer(dumper, data):
+    value = []
+    for item_key, item_value in data.items():
+        node_key = dumper.represent_data(item_key)
+        node_value = dumper.represent_data(item_value)
+        value.append((node_key, node_value))
+    return yaml.nodes.MappingNode(u'tag:yaml.org,2002:map', value)
+
+
+if np is not None:
+    # Represent 1d ndarrays as lists in yaml files because it makes them much
+    # prettier
+    def ndarray_representer(dumper, data):
+        if len(np.shape(data)) == 1:
+            return dumper.represent_list([k for k in data])
+        elif len(np.shape(data)) == 2:
+            return dumper.represent_list([[l for l in k] for k in data])
+        else:
+            return dumper.represent_list(data.tolist())
+    yaml.add_representer(np.ndarray, ndarray_representer)
+    # represent numpy types as things that will print more cleanly
+    def complex_representer(dumper, data):
+        return dumper.represent_scalar('!complex', repr(data.tolist()))
+    yaml.add_representer(np.complex128, complex_representer)
+    yaml.add_representer(np.complex, complex_representer)
+    def complex_constructor(loader, node):
+        return complex(node.value)
+    yaml.add_constructor('!complex', complex_constructor)
+
+    def numpy_float_representer(dumper, data):
+        return dumper.represent_float(float(data))
+    yaml.add_representer(np.float64, numpy_float_representer)
+
+    def numpy_int_representer(dumper, data):
+        return dumper.represent_int(int(data))
+    yaml.add_representer(np.int64, numpy_int_representer)
+    yaml.add_representer(np.int32, numpy_int_representer)
+
+    def numpy_dtype_representer(dumper, data):
+        return dumper.represent_scalar('!dtype', data.name)
+    yaml.add_representer(np.dtype, numpy_dtype_representer)
+
+    def numpy_dtype_loader(loader, node):
+        name = loader.construct_scalar(node)
+        return np.dtype(name)
+    yaml.add_constructor('!dtype', numpy_dtype_loader)
+
+yaml.add_representer(Quantity, quantity_representer)
+yaml.add_representer(OrderedDict, ordereddict_representer)
 
 
 
+# remove the idXXX references in the dumper
+class MyDumper(yaml.Dumper):
+    def ignore_aliases(self, _data):
+        return True
 
+def as_quantity(value,unit=None):
+    from astropy.units import Quantity
+    if unit!=None:
+        value = [value,unit]
+    elif "[" and "]" in value:
+        value = value.replace("]","[").split("[")
+    elif "(" and ")" in value:
+        value = value.replace(")","(").split("(")
+    elif "<" and ">" in value:
+        value = value.replace(">","<").split("<")
+    else:
+        value = value.split(" ")
+    return(Quantity(value=float(value[0]),unit=value[1]))
 
+def unique(items):
+    return([k for k in list(set(items))])
 
+### Create Drawers
+Telescope   = OrderedDict(YamlTemplate['Telescope'])
+Camera      = Telescope['camera']
+Optics      = Telescope['optics']
+Mount       = Telescope['mount']
+MonitorUnit = Telescope['monitorunit']
 
+Camera["ID"] = "GCTProto_v00"
+Camera["Description"] = "GCT SST Prototype camera"
 
+PixelTable = Camera["pixels"]
+DrawerDict = Camera["drawers"]
 
+DrawerDict['Module'] = OrderedDict(YamlTemplate['Drawer'])
+DrawerModule = DrawerDict['Module']
+DrawerModule["ID"] = "Drawer:Module"
+DrawerModule["Description"] = "Cluster of pixels with the same module"
+DrawerModule["Header"] = ["ID", "Can_master", "Can_node", "Module"]
+DrawerModule["Units"]  = [None, None, None, None]
 
+for drawer in DrawerDict:
+    raw_geometry_file_content["ID"] = raw_geometry_file_content[drawer]
+    data = [[c for c in l]\
+        for l in raw_geometry_file_content[DrawerModule["Header"]]]
+    # Join by ||, then find unique
+    unique_rows = np.unique(['||'.join(str(l))\
+        for l in data],return_index=True)[1]
+    DrawerModule["Data"] = np.array(data)[unique_rows]
+
+PixelTable["ID"] = "PixelTable"
+PixelTable["Description"] = "Cluster of pixels with the same module"
+PixelTable["Header"] = ["ID", "x", "y", "Pixel_number", "Drawer:Module"]
+header_from = ["ID", "x[mm]", "y[mm]", "Pixel_number", "Module"]
+PixelTable["Units"]  = [None, "mm", "mm", None]
+raw_geometry_file_content["ID"] = raw_geometry_file_content[drawer]
+
+PixelTable["Data"] = [[c for c in l] for l in raw_geometry_file_content[header_from]]
+
+#content.write("test.ecsv",ascii.ecsv)
+YamlCamOut = OrderedDict()
+YamlCamOut["Telescope"] = Telescope
+
+with open("gct_cam_output_test_v01.yaml","w+") as fout:
+    yaml.dump(YamlCamOut, fout, Dumper=MyDumper)#, default_flow_style=True)
 
 
 
@@ -40,6 +154,24 @@ content = ascii.read(infile)
 
 
 sys.exit(0)
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 ######################### FULL #############3
@@ -81,7 +213,7 @@ def quantity_representer(dumper, data):
     item_key   = float(data.value)
     item_value = str(data.unit)
     value = "%s %s" %(item_key,item_value)
-    
+
     return dumper.represent_str(value)
 
 
@@ -167,7 +299,7 @@ for k,pixel in enumerate(content):
         if C == "%s=%s" %(criteria,pixel[criteria]):
             CD[C]["pixels"].append(Pixel["ID"])
             break
-    
+
     Camera["pixels"][Pixel["ID"]] = Pixel
 
 #content.write("test.ecsv",ascii.ecsv)
@@ -208,14 +340,14 @@ YamlObject['CameraGeometry']['Data'] = []
 
 for pixel in content:
     Pixel = []
-    for k,item in enumerate(content.columns.keys()):    
+    for k,item in enumerate(content.columns.keys()):
         Pixel.append(get_flat_type(pixel[item]))
-    
-    YamlObject['CameraGeometry']['Data'].append(Pixel) 
 
-with open('test.yaml', 'w') as fout: 
+    YamlObject['CameraGeometry']['Data'].append(Pixel)
+
+with open('test.yaml', 'w') as fout:
     yaml.safe_dump(YamlObject, fout)#, default_flow_style=True)
-    
+
 #exit(0)
 
 '''
@@ -224,13 +356,13 @@ for k,item in enumerate(content.columns.keys()):
     # Convert from numpys -> float and append as an array
     YamlObject['CameraGeometry'][item] = [get_flat_type(val) for val in content.columns[item]]
 
-with open('test.yaml', 'w') as fout: 
+with open('test.yaml', 'w') as fout:
     yaml.dump(YamlObject, fout)#, default_flow_style=True)
 '''
 
 # Read back the file and plot the array
 
-with open('test.yaml', 'r') as fin: 
+with open('test.yaml', 'r') as fin:
     YamlObject_read = yaml.load(fin)#, default_flow_style=True)
 
 # The inline np.array(Data) is needed here, otherwise it raises an error.
@@ -245,8 +377,3 @@ x = CameraGeometry['x[mm]']
 y = CameraGeometry['y[mm]']
 plt.scatter(x=x, y=y, alpha=0.5)
 plt.show()
-
-
-
-
-
