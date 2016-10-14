@@ -1,0 +1,148 @@
+##### ~~~~~~~~~~~~ ######
+##### ARRAY CONFIG ######
+##### ~~~~~~~~~~~~ ######
+
+
+### COMMON ATTRIBUTES ###
+#########################
+
+# Not sure if this is needed in the yaml or only in the ddbb.
+# We can load these common attributes into any of our objects.
+CommonAttributes: &defaultCommonAttributes
+  serialNumber: null
+  commisioningDate: null
+  decomissioningDate: null
+
+Table: &defaulttable
+  # Table should contain as a first column an ID tag.
+  ID: null # Number/Code to identify the pixel
+  Description: null
+  Header: []
+  Data:  [] 
+  Units: []
+
+### FUNDAMENTAL TYPES FOR CAMERAS ###
+#####################################
+
+# PIXELS
+
+PhotoDetector: &defaultphotodetector
+  <<: &defaulttable
+
+PixelElectronics: &defaultpixelelectronics
+  <<: &defaulttable
+  
+PixelOptics: &defaultpixeloptics
+  <<: &defaulttable
+  
+Pixel: &defaultpixel
+  <<: &defaulttable
+  # Properties photodetector, electronics, optics, type, posX, posY, posZ, area, active ...
+
+# DRAWERS: CLUSTERS OF PIXELS WITH SOME COMMON PROPERTIES (OPTIONAL)
+DrawerElectronics: &defaultdrawerelectronics
+  <<: &defaulttable
+
+Drawer: &defaultdrawer
+  <<: &defaulttable
+
+# CAMERA: ARRAY OF PIXELS/DRAWERS
+CameraOptics: &defaultcameraoptics
+  <<: &defaulttable
+
+Camera: &defaultcamera
+  <<: &defaulttable
+  drawers: {}
+  pixels: 
+    <<: &defaultpixels
+
+### FUNDAMENTAL TYPES FOR OPTICS ###
+####################################
+
+Panel: &defaultpanel
+  <<: &defaulttable
+
+Mirror: &defaultmirror
+  <<: &defaulttable
+
+TelescopeOptics: &defaultoptics
+  <<: &defaulttable
+
+# This should probably go in a separate section or file.
+DCTelescopeOptics:
+  <<: *defaultoptics
+
+SCTelescopeOptics:
+  <<: *defaultoptics
+  mirror:
+    primary: null
+    secondary: null
+
+
+### FUNDAMENTAL TYPES FOR MOUNT ###
+###################################
+
+Mount: &defaultmount
+  ID: null
+  Type: null
+
+
+### FUNDAMENTAL TYPES FOR MONITORUNIT ###
+#########################################
+
+MonitorUnit: &defaultmonitor
+  ID: null
+  name: null
+
+
+### FUNDAMENTAL TYPES FOR TELESCOPE ###
+#######################################
+
+Telescope: &defaultteslescope
+  ID: null
+  type: null
+  posX: null
+  posY: null
+  posZ: null
+  monitorunit:
+    <<: *defaultmonitor
+  mount:
+    <<: *defaultmount
+  optics:
+    <<: *defaultoptics
+  camera:
+    <<: *defaultcamera
+
+
+### FUNDAMENTAL TYPES FOR ARRAY ###
+###################################
+
+Array: &defaultarray
+  ID: null
+  site: null
+  telescopes: [] # 
+
+AuxiliaryInstrument: &defaultauxiliaryinstrument
+  # ParentID: We should decide whether we need this or not.
+  ID: null
+  names: null
+  
+Site: &defaultsite
+  ID: null
+  name: null # the name of the site.
+  latitude: null
+  longitude: null
+  altitude: null
+  auxiliaryInstruments: []
+  array:
+    <<: *defaultarray
+  
+Observatory: &defaultobservatory
+  ID: null
+  name: null
+  description: null
+  sites: [] # array of sites
+
+
+
+
