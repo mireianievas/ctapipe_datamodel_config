@@ -18,7 +18,7 @@ Table: &defaulttable
   ID: null # Number/Code to identify the pixel
   Description: null
   Header: []
-  Data:  [] 
+  Data:  []
   Units: []
 
 ### FUNDAMENTAL TYPES FOR CAMERAS ###
@@ -31,10 +31,10 @@ PhotoDetector: &defaultphotodetector
 
 PixelElectronics: &defaultpixelelectronics
   <<: &defaulttable
-  
+
 PixelOptics: &defaultpixeloptics
   <<: &defaulttable
-  
+
 Pixel: &defaultpixel
   <<: &defaulttable
   # Properties photodetector, electronics, optics, type, posX, posY, posZ, area, active ...
@@ -53,7 +53,7 @@ CameraOptics: &defaultcameraoptics
 Camera: &defaultcamera
   <<: &defaulttable
   drawers: {}
-  pixels: 
+  pixels:
     <<: &defaultpixels
 
 ### FUNDAMENTAL TYPES FOR OPTICS ###
@@ -68,66 +68,41 @@ Mirror: &defaultmirror
 TelescopeOptics: &defaultoptics
   <<: &defaulttable
 
-# This should probably go in a separate section or file.
-DCTelescopeOptics:
-  <<: *defaultoptics
-
-SCTelescopeOptics:
-  <<: *defaultoptics
-  mirror:
-    primary: null
-    secondary: null
-
-
 ### FUNDAMENTAL TYPES FOR MOUNT ###
 ###################################
 
 Mount: &defaultmount
-  ID: null
-  Type: null
+  <<: *defaulttable
 
 
 ### FUNDAMENTAL TYPES FOR MONITORUNIT ###
 #########################################
 
 MonitorUnit: &defaultmonitor
-  ID: null
-  name: null
+  <<: *defaulttable
 
 
 ### FUNDAMENTAL TYPES FOR TELESCOPE ###
 #######################################
 
 Telescope: &defaultteslescope
-  ID: null
-  type: null
-  posX: null
-  posY: null
-  posZ: null
-  monitorunit:
-    <<: *defaultmonitor
-  mount:
-    <<: *defaultmount
-  optics:
-    <<: *defaultoptics
-  camera:
-    <<: *defaultcamera
+  <<: *defaulttable
+  # should include monitorunit, mount, optics, camera
 
 
 ### FUNDAMENTAL TYPES FOR ARRAY ###
 ###################################
 
 Array: &defaultarray
-  ID: null
-  site: null
-  telescopes: [] # 
+  <<: *defaulttable
 
 AuxiliaryInstrument: &defaultauxiliaryinstrument
-  # ParentID: We should decide whether we need this or not.
-  ID: null
-  names: null
-  
+  <<: *defaulttable
+
 Site: &defaultsite
+  <<: *defaulttable
+  # should have lat, lon, alt,
+  # should include a list of auxliary instruments
   ID: null
   name: null # the name of the site.
   latitude: null
@@ -136,13 +111,6 @@ Site: &defaultsite
   auxiliaryInstruments: []
   array:
     <<: *defaultarray
-  
+
 Observatory: &defaultobservatory
-  ID: null
-  name: null
-  description: null
-  sites: [] # array of sites
-
-
-
-
+  <<: *defaulttable
