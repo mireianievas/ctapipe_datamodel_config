@@ -103,6 +103,8 @@ Telescope: &defaultteslescope
     <<: *defaultmount
   optics:
     <<: *defaultoptics
+  camera:
+    <<: *defaultcamera
   # should include monitorunit, mount, optics, camera
 
 
@@ -110,15 +112,18 @@ Telescope: &defaultteslescope
 ###################################
 
 Array: &defaultarray
+  # Table of telescopes
   <<: *defaulttable
 
 AuxiliaryInstrument: &defaultauxiliaryinstrument
-  <<: *defaulttable
+  # Describe an instrument
+  <<: *defaultcommonprop
 
 Site: &defaultsite
   <<: *defaulttable
   # should have lat, lon, alt,
   # should include a list of auxliary instruments
+  # should include an array of telescopes
   ID: null
   name: null # the name of the site.
   latitude: null
