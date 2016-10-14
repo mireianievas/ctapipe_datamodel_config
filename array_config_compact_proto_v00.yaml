@@ -27,31 +27,31 @@ Table: &defaulttable
 # PIXELS
 
 PhotoDetector: &defaultphotodetector
-  <<: &defaulttable
+  <<: *defaulttable
 
 PixelElectronics: &defaultpixelelectronics
-  <<: &defaulttable
+  <<: *defaulttable
 
 PixelOptics: &defaultpixeloptics
-  <<: &defaulttable
+  <<: *defaulttable
 
 Pixel: &defaultpixel
-  <<: &defaulttable
+  <<: *defaulttable
   # Properties photodetector, electronics, optics, type, posX, posY, posZ, area, active ...
 
 # DRAWERS: CLUSTERS OF PIXELS WITH SOME COMMON PROPERTIES (OPTIONAL)
 DrawerElectronics: &defaultdrawerelectronics
-  <<: &defaulttable
+  <<: *defaulttable
 
 Drawer: &defaultdrawer
-  <<: &defaulttable
+  <<: *defaulttable
 
 # CAMERA: ARRAY OF PIXELS/DRAWERS
 CameraOptics: &defaultcameraoptics
-  <<: &defaulttable
+  <<: *defaulttable
 
 Camera: &defaultcamera
-  <<: &defaulttable
+  <<: *defaulttable
   drawers: {}
   pixels:
     <<: &defaultpixels
@@ -60,13 +60,13 @@ Camera: &defaultcamera
 ####################################
 
 Panel: &defaultpanel
-  <<: &defaulttable
+  <<: *defaulttable
 
 Mirror: &defaultmirror
-  <<: &defaulttable
+  <<: *defaulttable
 
 TelescopeOptics: &defaultoptics
-  <<: &defaulttable
+  <<: *defaulttable
 
 ### FUNDAMENTAL TYPES FOR MOUNT ###
 ###################################
