@@ -1,0 +1,22 @@
+camera_body_diameter: 42.0
+camera_depth: 50.0
+collectionArea: null
+diameter: [400.0, 200.0]
+focalLength: 228.3
+focalSurfacePolParameters: [305.03801, -0.005, -1.25e-07, -6.25e-12, -3.90625e-16,
+  -2.734375e-20]
+focusOffset: 0.0
+fov: 8.0
+mirrorClass: SC
+mirrorHoleDiameter: [130.0, 10.0]
+mirrorList: [gct_primary_segments.dat, gct_secondary_segment.dat]
+mirrorOffset: 0.0
+primaryMirrorPolParameters: [0.0, 0.00054280255, 3.391288e-10, -1.345136e-13, 1.290003e-17,
+  -6.850814e-22, 2.005972e-26, -3.056334e-31, 1.88533e-36]
+primaryRefRadius: 0.0
+reflectivity: [primaryRef.dat, secondaryRef.dat]
+secondaryMirrorPolParameters: [-356.1075, 0.002435033, 3.879414e-08, -1.311115e-11,
+  2.883094e-15, -3.978197e-19, 3.337129e-23, -1.542123e-27, 2.987865e-32]
+secondaryRefRadius: 0.0
+telescopeTransmission: [0.881, 1.0, 0.0648, 4.419, 46.423]
+type: GCT

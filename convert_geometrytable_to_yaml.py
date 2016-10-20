@@ -2,43 +2,29 @@
 
 from astropy.table import Table
 from astropy.io import ascii
-from collections import OrderedDict
 from astropy.units import Quantity
 import ruamel.yaml as yaml
-from ruamel.yaml.representer import SafeRepresenter
+from collections import OrderedDict
+from ruamel.yaml.constructor import SafeConstructor
+from ruamel.yaml.representer import SafeRepresenter, RoundTripRepresenter
+import ruamel.yaml.comments as Comments
 import numpy as np
 import sys
 from urllib.request import urlopen
-
 
 templatef_local  = "array_config_compact_proto_v00.yaml"
 templatef_remote = "https://raw.githubusercontent.com/mireianievas/ctapipe_datamodel_config/master/array_config_compact_proto_v00.yaml"
 infile_camera  = "https://drive.google.com/uc?export=download&id=0B4OIF0_Zm04WbFdfTzBuOTQ2em8"
 infile_mirrors = "https://raw.githubusercontent.com/mireianievas/ctapipe_datamodel_config/master/configOpticsGCT.yaml"
 
-# Read the content and the template
 
-with urlopen(templatef_remote) as fin:
-    YamlTemplate = yaml.safe_load(fin)
-
-raw_camgeometry_file_content = ascii.read(infile_camera)
-
-with urlopen(infile_mirrors) as fin:
-    YamlOptics = yaml.safe_load(fin)
 
 ##### YAML Handlers
 def quantity_representer(dumper, data):
     item_key   = float(data.value)
     item_value = str(data.unit)
     value = "%s %s" %(item_key,item_value)
-def ordereddict_representer(dumper, data):
-    value = []
-    for item_key, item_value in data.items():
-        node_key = dumper.represent_data(item_key)
-        node_value = dumper.represent_data(item_value)
-        value.append((node_key, node_value))
-    return yaml.nodes.MappingNode(u'tag:yaml.org,2002:map', value)
-
+    return yaml.representer_str(value)
 
 if np is not None:
     # Represent 1d ndarrays as lists in yaml files because it makes them much
@@ -51,6 +37,7 @@ if np is not None:
         else:
             return dumper.represent_list(data.tolist())
     yaml.add_representer(np.ndarray, ndarray_representer)
+
     # represent numpy types as things that will print more cleanly
     def complex_representer(dumper, data):
         return dumper.represent_scalar('!complex', repr(data.tolist()))
@@ -78,10 +65,28 @@ if np is not None:
         return np.dtype(name)
     yaml.add_constructor('!dtype', numpy_dtype_loader)
 
+
 yaml.add_representer(Quantity, quantity_representer)
-yaml.add_representer(OrderedDict, ordereddict_representer)
 
+yaml.add_representer(Comments.CommentedSeq,
+  RoundTripRepresenter.represent_list)
 
+yaml.add_representer(Comments.CommentedMap,
+  RoundTripRepresenter.represent_dict)
+
+yaml.add_representer(Comments.CommentedOrderedMap,
+  RoundTripRepresenter.represent_ordereddict)
+
+yaml.add_representer(Comments.CommentedSet, \
+  RoundTripRepresenter.represent_set)
+
+def dict_representer(dumper, data):
+    return dumper.represent_dict(data.items())
+
+def dict_constructor(loader, node):
+    return OrderedDict(loader.construct_pairs(node))
+
+yaml.add_representer(OrderedDict, dict_representer)
 
 # remove the idXXX references in the dumper
 class MyDumper(yaml.Dumper):
@@ -104,6 +109,14 @@ def as_quantity(value,unit=None):
 
 def unique(items):
     return([k for k in list(set(items))])
+
+
+# Read the content and the template
+with urlopen(templatef_remote) as fin:
+    YamlTemplate = yaml.load(fin)
+raw_camgeometry_file_content = ascii.read(infile_camera)
+with urlopen(infile_mirrors) as fin:
+    YamlOptics = yaml.load(fin)
 
 ### Create Drawers
 Telescope   = OrderedDict(YamlTemplate['Telescope'])
@@ -147,19 +160,36 @@ PixelTable["Data"] = [[c for c in l] \
 
 camoutfile = "gct_cam_output_test_v00.yaml"
 with open(camoutfile,"w+") as fout:
-    yaml.dump(Camera, fout, Dumper=MyDumper, default_flow_style=False)
+    yaml.round_trip_dump(Camera, fout, Dumper=MyDumper)
 
 optoutfile = "gct_optics_output_test_v00.yaml"
 Optics = YamlOptics['TelescopeOpticsGCT']
 with open(optoutfile,"w+") as fout:
-    yaml.dump(Optics, fout, Dumper=MyDumper, default_flow_style=False)
+    yaml.round_trip_dump(Optics, fout, Dumper=MyDumper)
 
-Telescope["camera"] = "include: %s" %camoutfile
-Telescope["optics"] = "include: %s" %optoutfile
+def yaml_include_file(filename):
+    content = {}
+    content['file'] = filename
+    return(content)
+
+YamlObject = OrderedDict()
+YamlObject['GCT_Telescope_Prototype'] = Telescope
+Telescope["camera"] = yaml_include_file(camoutfile)
+Telescope["optics"] = yaml_include_file(optoutfile)
+
+'''
+# To implement:
+# How to expand this include_file format
+optics = Yaml['GCT_Telescope_Prototype']['optics']
+if 'file' in optics:
+    with open(optics['file']) as fin:
+        Yaml['GCT_Telescope_Prototype']['optics'] = yaml.load(fin)
+loop over dicts (recursive function ??)
+'''
 
 teloutfile = "gct_telescope_output_test_v00.yaml"
 with open(teloutfile,"w+") as fout:
-    yaml.dump(Telescope, fout, Dumper=MyDumper, default_flow_style=False)
+    yaml.dump(YamlObject, fout, Dumper=MyDumper)
 
 
 

@@ -1,0 +1,20 @@
+GCT_Telescope_Prototype:
+  ID: null
+  monitorunit:
+    Data: []
+    Header: []
+    ID: null
+    Units: []
+    description: null
+    type: null
+  mount:
+    Data: []
+    Header: []
+    ID: null
+    Units: []
+    description: null
+    type: null
+  description: null
+  camera: {file: gct_cam_output_test_v00.yaml}
+  optics: {file: gct_optics_output_test_v00.yaml}
+  type: null
