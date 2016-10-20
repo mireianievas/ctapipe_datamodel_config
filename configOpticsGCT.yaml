@@ -1,0 +1,140 @@
+---
+
+TelescopeOpticsGCT: &gctDefaultOptics
+    mirrorClass: SC
+    type: GCT
+    focalLength: 228.3 # [cm]
+    collectionArea: null # [m^2] Is it like effective area? Do we need it? 
+    fov: 8. # [deg]
+    focusOffset: 0. # [cm] Distance of the starlight focus from the camera pixels (light guides) entry.
+    mirrorOffset: 0. # [cm] Offset of mirror backplane from fixed point of telescope mount (positive if fixed point is between mirror and focus).
+    camera_depth: 50. # [cm] 
+    camera_body_diameter: 42.0 # [cm] 
+    telescopeTransmission: 
+        # Telescope transmission angle dependence of function 1:
+        #   T(theta) = p0 / (1.+p2*(sin(theta)/p3rad)^p4) with p3rad = p3*pi/180.
+        # Parameters:
+        #   p0 : on-axis transmission
+        #   p1 : function number (0: constant, 1: variable as shown above). Default: 0.
+        #   p2 : relative change from on-axis to reference angle (or actually vice-versa). Default: 0.
+        #   p3 : reference angle (deg.). If missing, p3rad = camera body radius / focal length is assumed.
+        #   p4 : steepness (lower law index). Default: 2.
+        # example values - 0.881 1 0.0648 4.419 46.423
+        - 0.881
+        - 1. 
+        - 0.0648 
+        - 4.419
+        - 46.423
+    reflectivity: 
+        - primaryRef.dat
+        - secondaryRef.dat
+    diameter: # in the case of SC, two diameters [primary, secondary].
+        - 400. # [cm]
+        - 200. # [cm]
+    mirrorHoleDiameter: # in the case of SC, two diameters for the two holes [primary, secondary].
+        - 130. # [cm]
+        - 10. # [cm]
+    primaryMirrorPolParameters: [ 0.000000, 5.4280255e-04, 3.391288e-10, -1.345136e-13, 1.290003e-17, -6.850814e-22, 2.005972e-26, -3.056334e-31, 1.885330e-36 ]
+        # [cm] Defines the position of the primary mirror along the optical axis and its shape. The
+        # first parameter (p0) is the offset of the mirror with respect to the common reference
+        # point defined by mirrorOffset, with positive values indicating that the centre
+        # of the primary (assuming it has no central hole) is above the reference point. Apart
+        # from that, a parameter pi adds a term pi r( 2i) to the height of the mirror at radial
+        # offset r. A parabolic primary will have the second parameter (p1) at a positive value
+        # and all further parameters at 0. (which can be omitted since this is the pre-defined
+        # default). Units: all in cm (for radius r also in cm).
+    secondaryMirrorPolParameters: [ -356.1075, 2.435033e-03, 3.879414e-08, -1.311115e-11, 2.883094e-15, -3.978197e-19, 3.337129e-23, -1.542123e-27, 2.987865e-32 ]
+        # [cm] Defines the position of the secondary mirror along the optical axis and its shape.
+        # They are defined just like primaryMirrorPolParameters except that the secondary mirror looks the other way, i.e. p0 will usually be negative since in the coordinate frame
+        # of the secondary, it is ‘below’ the common reference point. A concave secondary, reducing the focal length if placed between the primary and its focus, will have p1 > 0.
+        # A convex secondary (e.g. for Cassegrain or Ritchey-Chrétien optics), enlarging the focal length, will have p1 < 0. Units: all in cm (for radius r also in cm).
+    focalSurfacePolParameters: [ 305.03801,-5.0e-3, -1.25e-7, -6.25e-12, -3.90625e-16, -2.734375e-20 ]
+        # [cm] Defines the position of the focal surface along the optical axis and its off-axis shape.
+        # They are defined just like primaryMirrorPolParameters. The focusOffset still
+        # applies, but with a curved focal surface only in the camera centre, such that star light
+        # would be focused on the camera lid surface but light from the typical distance of the
+        # shower maximum would be focused on the pixel entrance. Note that this offset may
+        # be impractibly small with secondary mirrors reducing the plate scale. The direction
+        # of the incoming rays is not transformed into the normal plane of the focal surface,
+        # thus corresponding to pixels shifted w.r.t. to a plane. Actual implementations, if
+        # really following a curved shape (technically difficult), may differ. Units: all in cm (for radius r also in cm).
+    primaryRefRadius: 0.
+        # [cm] The length scale to which the primaryMirrorPolParameters apply. 
+        # Typical values could be 1.0 or the focal length of the primary. Only applicable for mirrorClass = SC.
+    secondaryRefRadius: 0. 
+        # [cm] The length scale to which the secondaryMirrorPolParameters apply. 
+        # Typical values could be 1.0 or the focal length of the secondary or the primary. Only applicable for mirrorClass = SC.
+    mirrorList: 
+        - gct_primary_segments.dat
+        - gct_secondary_segment.dat
+
+
+TelescopeOpticsASTRI: &astriDefaultOptics
+    mirrorClass: SC
+    type: ASTRI
+    focalLength: 228.3 # [cm]
+    collectionArea: null # [m^2] Is it like effective area? Do we need it? 
+    fov: 8. # [deg]
+    focusOffset: 0. # [cm] Distance of the starlight focus from the camera pixels (light guides) entry.
+    mirrorOffset: 0. # [cm] Offset of mirror backplane from fixed point of telescope mount (positive if fixed point is between mirror and focus).
+    camera_depth: 50. # [cm] 
+    camera_body_diameter: 42.0 # [cm] 
+    telescopeTransmission: 
+        # Telescope transmission angle dependence of function 1:
+        #   T(theta) = p0 / (1.+p2*(sin(theta)/p3rad)^p4) with p3rad = p3*pi/180.
+        # Parameters:
+        #   p0 : on-axis transmission
+        #   p1 : function number (0: constant, 1: variable as shown above). Default: 0.
+        #   p2 : relative change from on-axis to reference angle (or actually vice-versa). Default: 0.
+        #   p3 : reference angle (deg.). If missing, p3rad = camera body radius / focal length is assumed.
+        #   p4 : steepness (lower law index). Default: 2.
+        # example values - 0.881 1 0.0648 4.419 46.423
+        - 0.881
+        - 1. 
+        - 0.0648 
+        - 4.419
+        - 46.423
+    reflectivity: 
+        - primaryRef.dat
+        - secondaryRef.dat
+    diameter: # in the case of SC, two diameters [primary, secondary].
+        - 430.6 # [cm]
+        - 180. # [cm]
+    mirrorHoleDiameter: # in the case of SC, two diameters for the two holes [primary, secondary].
+        - 130. # [cm]
+        - 10. # [cm]
+    primaryMirrorPolParameters: [ 0.000000, 5.4280255e-04, 3.391288e-10, -1.345136e-13, 1.290003e-17, -6.850814e-22, 2.005972e-26, -3.056334e-31, 1.885330e-36 ]
+        # [cm] Defines the position of the primary mirror along the optical axis and its shape. The
+        # first parameter (p0) is the offset of the mirror with respect to the common reference
+        # point defined by mirrorOffset, with positive values indicating that the centre
+        # of the primary (assuming it has no central hole) is above the reference point. Apart
+        # from that, a parameter pi adds a term pi r( 2i) to the height of the mirror at radial
+        # offset r. A parabolic primary will have the second parameter (p1) at a positive value
+        # and all further parameters at 0. (which can be omitted since this is the pre-defined
+        # default). Units: all in cm (for radius r also in cm).
+    secondaryMirrorPolParameters: [ -356.1075, 2.435033e-03, 3.879414e-08, -1.311115e-11, 2.883094e-15, -3.978197e-19, 3.337129e-23, -1.542123e-27, 2.987865e-32 ]
+        # [cm] Defines the position of the secondary mirror along the optical axis and its shape.
+        # They are defined just like primaryMirrorPolParameters except that the secondary mirror looks the other way, i.e. p0 will usually be negative since in the coordinate frame
+        # of the secondary, it is ‘below’ the common reference point. A concave secondary, reducing the focal length if placed between the primary and its focus, will have p1 > 0.
+        # A convex secondary (e.g. for Cassegrain or Ritchey-Chrétien optics), enlarging the focal length, will have p1 < 0. Units: all in cm (for radius r also in cm).
+    focalSurfacePolParameters: [ 305.03801,-5.0e-3, -1.25e-7, -6.25e-12, -3.90625e-16, -2.734375e-20 ]
+        # [cm] Defines the position of the focal surface along the optical axis and its off-axis shape.
+        # They are defined just like primaryMirrorPolParameters. The focusOffset still
+        # applies, but with a curved focal surface only in the camera centre, such that star light
+        # would be focused on the camera lid surface but light from the typical distance of the
+        # shower maximum would be focused on the pixel entrance. Note that this offset may
+        # be impractibly small with secondary mirrors reducing the plate scale. The direction
+        # of the incoming rays is not transformed into the normal plane of the focal surface,
+        # thus corresponding to pixels shifted w.r.t. to a plane. Actual implementations, if
+        # really following a curved shape (technically difficult), may differ. Units: all in cm (for radius r also in cm).
+    primaryRefRadius: 0.
+        # [cm] The length scale to which the primaryMirrorPolParameters apply. 
+        # Typical values could be 1.0 or the focal length of the primary. Only applicable for mirrorClass = SC.
+    secondaryRefRadius: 0. 
+        # [cm] The length scale to which the secondaryMirrorPolParameters apply. 
+        # Typical values could be 1.0 or the focal length of the secondary or the primary. Only applicable for mirrorClass = SC.
+    mirrorList: 
+        - gct_primary_segments.dat
+        - gct_secondary_segment.dat
+
+...          

@@ -13,14 +13,18 @@ from urllib.request import urlopen
 
 templatef_local  = "array_config_compact_proto_v00.yaml"
 templatef_remote = "https://raw.githubusercontent.com/mireianievas/ctapipe_datamodel_config/master/array_config_compact_proto_v00.yaml"
-infile = "https://drive.google.com/uc?export=download&id=0B4OIF0_Zm04WbFdfTzBuOTQ2em8"
+infile_camera  = "https://drive.google.com/uc?export=download&id=0B4OIF0_Zm04WbFdfTzBuOTQ2em8"
+infile_mirrors = "https://raw.githubusercontent.com/mireianievas/ctapipe_datamodel_config/master/configOpticsGCT.yaml"
 
 # Read the content and the template
 
 with urlopen(templatef_remote) as fin:
     YamlTemplate = yaml.safe_load(fin)
 
-raw_geometry_file_content = ascii.read(infile)
+raw_camgeometry_file_content = ascii.read(infile_camera)
+
+with urlopen(infile_mirrors) as fin:
+    YamlOptics = yaml.safe_load(fin)
 
 ##### YAML Handlers
 def quantity_representer(dumper, data):
@@ -122,9 +126,9 @@ DrawerModule["Header"] = ["ID", "Can_master", "Can_node", "Module"]
 DrawerModule["Units"]  = [None, None, None, None]
 
 for drawer in DrawerDict:
-    raw_geometry_file_content["ID"] = raw_geometry_file_content[drawer]
+    raw_camgeometry_file_content["ID"] = raw_camgeometry_file_content[drawer]
     data = [[c for c in l]\
-        for l in raw_geometry_file_content[DrawerModule["Header"]]]
+        for l in raw_camgeometry_file_content[DrawerModule["Header"]]]
     # Join by ||, then find unique
     unique_rows = np.unique(['||'.join(str(l))\
         for l in data],return_index=True)[1]
@@ -135,19 +139,27 @@ PixelTable["Description"] = "Cluster of pixels with the same module"
 PixelTable["Header"] = ["ID", "x", "y", "Pixel_number", "Drawer:Module"]
 header_from = ["ID", "x[mm]", "y[mm]", "Pixel_number", "Module"]
 PixelTable["Units"]  = [None, "mm", "mm", None]
-raw_geometry_file_content["ID"] = raw_geometry_file_content[drawer]
+raw_camgeometry_file_content["ID"] = raw_camgeometry_file_content[drawer]
 
-PixelTable["Data"] = [[c for c in l] for l in raw_geometry_file_content[header_from]]
-
-#content.write("test.ecsv",ascii.ecsv)
-YamlCamOut = OrderedDict()
-YamlCamOut["Telescope"] = Telescope
-
-with open("gct_cam_output_test_v01.yaml","w+") as fout:
-    yaml.dump(YamlCamOut, fout, Dumper=MyDumper)#, default_flow_style=True)
+PixelTable["Data"] = [[c for c in l] \
+    for l in raw_camgeometry_file_content[header_from]]
 
 
+camoutfile = "gct_cam_output_test_v00.yaml"
+with open(camoutfile,"w+") as fout:
+    yaml.dump(Camera, fout, Dumper=MyDumper, default_flow_style=False)
 
+optoutfile = "gct_optics_output_test_v00.yaml"
+Optics = YamlOptics['TelescopeOpticsGCT']
+with open(optoutfile,"w+") as fout:
+    yaml.dump(Optics, fout, Dumper=MyDumper, default_flow_style=False)
+
+Telescope["camera"] = "include: %s" %camoutfile
+Telescope["optics"] = "include: %s" %optoutfile
+
+teloutfile = "gct_telescope_output_test_v00.yaml"
+with open(teloutfile,"w+") as fout:
+    yaml.dump(Telescope, fout, Dumper=MyDumper, default_flow_style=False)
 
 
 
@@ -304,12 +316,25 @@ for k,pixel in enumerate(content):
 
 #content.write("test.ecsv",ascii.ecsv)
 
-YamlCamOut = dict()
+#YamlCamOut = dict()
+#YamlCamOut["Camera"] = Camera
 
-YamlCamOut["Camera"] = Camera
+camoutfile = "gct_cam_output_test_v00.yaml"
+with open(camoutfile,"w+") as fout:
+    yaml.dump(Camera, fout, Dumper=MyDumper, default_flow_style=False)
 
-with open("gct_cam_output_test_v00.yaml","w+") as fout:
-    yaml.dump(YamlCamOut, fout, Dumper=MyDumper, default_flow_style=False)
+optoutfile = "gct_optics_output_test_v00.yaml"
+Optics = YamlOptics['TelescopeOpticsGCT']
+with open(optoutfile,"w+") as fout:
+    yaml.dump(Optics, fout, Dumper=MyDumper, default_flow_style=False)
+
+Telescope = dict(YamlTemplate['Telescope'])
+Telescope["camera"] = "include: %s" %camoutfile
+Telescope["optics"] = "include: %s" %optoutfile
+
+teloutfile = "gct_telescope_output_test_v00.yaml"
+with open(teloutfile,"w+") as fout:
+    yaml.dump(Telescope, fout, Dumper=MyDumper, default_flow_style=False)
 
 
 sys.exit(0)

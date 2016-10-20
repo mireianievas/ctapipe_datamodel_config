@@ -15,8 +15,12 @@ CommonHistory: &defaultCommonAttributes
 
 CommonProperties: &defaultcommonprop
   ID: null # Number/Code to identify the pixel
-  Type: null
-  Description: null
+  type: null
+  description: null
+
+TableFile: &defaultextfile
+  <<: *defaultcommonprop
+  file: null
 
 Table: &defaulttable
   <<: *defaultcommonprop
@@ -63,19 +67,37 @@ Camera: &defaultcamera
 ### FUNDAMENTAL TYPES FOR OPTICS ###
 ####################################
 
-Panel: &defaultpanel
-  # Table of panels
-  <<: *defaulttable
+Segments: &defaultsegments
+  # Table of panels/segments
+  <<: *defaultextfile
+
 
 Mirror: &defaultmirror
   # Table of mirrors, can be one
-  <<: *defaulttable
+  <<: *defaultcommonprop
+  reflectivity: null
+  diameter: null
+  holeDiameter: null
+  mirrorPosition: null
+  focalSurfacePosition: null
+  segments:
+    <<: *defaultsegments
+
 
 TelescopeOptics: &defaultoptics
   <<: *defaultcommonprop
+  focalLength: null
+  collectionArea: null
+  fov: null
+  focusOffset: null
+  mirrorOffset: null
+  cameraDepth: null
+  cameraBodyDiameter: null
+  transmission: {}
   mirrors:
     primary:
       <<: *defaultmirror
+
     # May add a secondary if needed
 
 ### FUNDAMENTAL TYPES FOR MOUNT ###
