@@ -3,7 +3,6 @@ ID: GCTProto_v00
 description: null
 drawers:
   Module:
-    ID: Drawer:Module
     Data:
     - [1, 1, 1, 1]
     - [10, 3, 2, 10]
@@ -113,10 +112,11 @@ drawers:
     - [97, 2, 36, 97]
     - [98, 3, 26, 98]
     - [99, 3, 27, 99]
+    Header: [ID, Can_master, Can_node, Module]
+    ID: Drawer:Module
+    type: null
     description: null
     Units: [null, null, null, null]
-    Header: [ID, Can_master, Can_node, Module]
-    type: null
     Description: Cluster of pixels with the same module
 pixels:
   Data:
