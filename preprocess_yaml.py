@@ -19,7 +19,7 @@ from urllib.request import urlopen
 
 
 class File(str):
-    #yaml_tag = u'!File'
+    #yaml_tag = u'!file'
     def __init__(self, filename):
         self.filename = filename
     def read(self):
