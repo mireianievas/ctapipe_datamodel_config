@@ -1,7 +1,5 @@
 #!/bin/env python3
 
-#!/bin/env python3
-
 from astropy.table import Table
 from astropy.io import ascii
 from astropy.units import Quantity
