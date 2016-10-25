@@ -149,6 +149,7 @@ MonitorUnit = Telescope['monitorunit']
 
 Camera["ID"] = "GCTProto_v00"
 Camera["Description"] = "GCT SST Prototype camera"
+Camera["type"] = {"TelescopeCamera": "GCT"}
 
 PixelTable = Camera["pixels"]
 DrawerDict = Camera["drawers"]
@@ -186,6 +187,8 @@ with open(camoutfile,"w+") as fout:
 
 optoutfile = "gct_optics_output_test_v00.yaml"
 Optics = YamlOptics['TelescopeOpticsGCT']
+Optics["type"] = {"TelescopeOptics": "GCT"}
+
 with open(optoutfile,"w+") as fout:
     yaml.round_trip_dump(Optics, fout, Dumper=MyDumper)
 
@@ -229,6 +232,7 @@ YamlObject['GCT_Telescope_Prototype'] = Telescope
 Telescope["ID"]='GCT_Telescope_Prototype'
 Telescope["camera"] = yaml_include_file(camoutfile)
 Telescope["optics"] = yaml_include_file(optoutfile)
+Telescope["type"] = {"Telescope": "GCT"}
 
 '''
 # To implement:
