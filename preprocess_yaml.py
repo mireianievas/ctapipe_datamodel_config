@@ -43,7 +43,11 @@ def extfile_representer(dumper, data):
 def extfile_constructor(loader, node):
     from ruamel.yaml.nodes import ScalarNode
     if isinstance(node, ScalarNode):
-        return File(node.value).read()
+        # Load the contents wherever possible (file exists)
+        try:
+            return File(node.value).read()
+        except FileNotFoundError:
+            return File(node.value) # Alternatively, give the object.
 
 yaml.add_representer(File, extfile_representer)
 yaml.add_constructor(u'!file', extfile_constructor)
