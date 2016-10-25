@@ -43,7 +43,7 @@ def extfile_representer(dumper, data):
 def extfile_constructor(loader, node):
     from ruamel.yaml.nodes import ScalarNode
     if isinstance(node, ScalarNode):
-        return File(node.value)
+        return File(node.value).read()
 
 yaml.add_representer(File, extfile_representer)
 yaml.add_constructor(u'!file', extfile_constructor)
@@ -51,8 +51,13 @@ yaml.add_constructor(u'!file', extfile_constructor)
 ### expand
 
 with open("gct_telescope_output_test_v00.yaml") as fin:
-    Telescope = yaml.load(fin)['GCT_Telescope_Prototype']
+    YamlObject = yaml.load(fin)
+    Telescope  = YamlObject['GCT_Telescope_Prototype']
 
+with open("gct_merged_output_test_v00.yaml","w+") as fout:
+    yaml.dump(YamlObject, fout, Dumper=Dumper)
+
+'''
 def recursive_build(item):
     for subitem in item:
         content = item[subitem]
@@ -68,3 +73,4 @@ def recursive_build(item):
         item[subitem] = content
 
     return item
+'''
